@@ -17,11 +17,11 @@ package com.example.android.pets;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -158,6 +158,15 @@ public class EditorActivity extends AppCompatActivity {
         values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, Integer.parseInt(stringWeight));
         values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender);
 
+        Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, values);
+
+        if (newUri == null) {
+            Toast.makeText(this, getString(R.string.editor_insert_pet_failed), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
+        }
+
+        /*
         long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
         if (newRowId != -1) {
             Toast.makeText(this, "Pet saved with id:" + newRowId, Toast.LENGTH_SHORT).show();
@@ -165,5 +174,6 @@ public class EditorActivity extends AppCompatActivity {
             Toast.makeText(this, "ERROR with saving pet", Toast.LENGTH_SHORT).show();
         }
         Log.i(LOG_TAG, "InsertData id:" + newRowId);
+        */
     }
 }

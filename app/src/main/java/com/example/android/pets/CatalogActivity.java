@@ -19,10 +19,10 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -86,7 +86,7 @@ public class CatalogActivity extends AppCompatActivity {
 
         String selection = PetContract.PetEntry.COLUMN_PET_GENDER + " =?";
         String[] selectionArgs = {String.valueOf(PetContract.PetEntry.GENDER_MALE)};
-
+/*
         Cursor cursor = db.query(
                 PetContract.PetEntry.TABLE_NAME,
                 projection,
@@ -96,6 +96,12 @@ public class CatalogActivity extends AppCompatActivity {
                 null,
                 null
                 );
+        */
+
+        Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI,
+                                                    projection, selection, selectionArgs, null);
+
+
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
@@ -165,7 +171,6 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     private void insertData() {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(PetContract.PetEntry.COLUMN_PET_NAME, "Tot");
@@ -173,7 +178,7 @@ public class CatalogActivity extends AppCompatActivity {
         contentValues.put(PetContract.PetEntry.COLUMN_PET_GENDER, PetContract.PetEntry.GENDER_MALE);
         contentValues.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, 17);
 
-        long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, contentValues);
-        Log.i(LOG_TAG, "newRowId: " + newRowId);
+        Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, contentValues);
+
     }
 }
