@@ -18,7 +18,6 @@ package com.example.android.pets;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -29,7 +28,6 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.example.android.pets.data.PetContract;
-import com.example.android.pets.data.PetDbHelper;
 
 /**
  * Displays list of pets that were entered and stored in the app.
@@ -37,7 +35,6 @@ import com.example.android.pets.data.PetDbHelper;
 public class CatalogActivity extends AppCompatActivity {
 
     private final static String LOG_TAG = CatalogActivity.class.getSimpleName();
-    private PetDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,12 +63,6 @@ public class CatalogActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
-        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-        // and pass the context, which is the current activity.
-        mDbHelper = new PetDbHelper(this);
-
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         String[] projection = {
                 PetContract.PetEntry._ID,
@@ -80,10 +71,6 @@ public class CatalogActivity extends AppCompatActivity {
                 PetContract.PetEntry.COLUMN_PET_GENDER,
                 PetContract.PetEntry.COLUMN_PET_WEIGHT
         };
-
-        String selection = PetContract.PetEntry.COLUMN_PET_GENDER + " =?";
-        String[] selectionArgs = {String.valueOf(PetContract.PetEntry.GENDER_MALE)};
-
 
         Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI,
                                                     projection, null/*selection*/, null/*selectionArgs*/, null);
