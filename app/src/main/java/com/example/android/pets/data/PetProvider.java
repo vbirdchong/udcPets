@@ -83,7 +83,7 @@ public class PetProvider extends ContentProvider {
                 break;
 
             default:
-                throw new IllegalArgumentException("Can not query unknow URI " + uri);
+                throw new IllegalArgumentException("Can not query unknown URI " + uri);
         }
 
         return cursor;
