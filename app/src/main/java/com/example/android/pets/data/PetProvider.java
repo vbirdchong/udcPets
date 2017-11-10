@@ -86,6 +86,9 @@ public class PetProvider extends ContentProvider {
                 throw new IllegalArgumentException("Can not query unknown URI " + uri);
         }
 
+        Log.i(LOG_TAG, "query " + uri);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
         return cursor;
     }
 
@@ -129,11 +132,11 @@ public class PetProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case PETS:
-                return deletePet(selection, selectionArgs);
+                return deletePet(uri, selection, selectionArgs);
             case PET_ID:
                 selection = PetContract.PetEntry._ID + "=?";
                 selectionArgs = new String[] {String.valueOf(ContentUris.parseId(uri))};
-                return deletePet(selection, selectionArgs);
+                return deletePet(uri, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Delete not support for " + uri);
         }
@@ -167,10 +170,8 @@ public class PetProvider extends ContentProvider {
             throw new IllegalArgumentException("Pet requires a breed");
         }
 
-        int gender = contentValues.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
-        if (gender != PetContract.PetEntry.GENDER_UNKNOW ||
-                gender != PetContract.PetEntry.GENDER_FEMALE ||
-                gender != PetContract.PetEntry.GENDER_MALE) {
+        Integer gender = contentValues.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
+        if (gender == null || !PetContract.PetEntry.isValidGender(gender)) {
             throw new IllegalArgumentException("Pet gender is not accepted");
         }
 
@@ -187,6 +188,8 @@ public class PetProvider extends ContentProvider {
             return null;
         }
 
+        Log.i(LOG_TAG, "insertPet " + uri);
+        getContext().getContentResolver().notifyChange(uri, null);
         return ContentUris.withAppendedId(uri, id);
     }
 
@@ -201,7 +204,7 @@ public class PetProvider extends ContentProvider {
 
         if (contentValues.containsKey(PetContract.PetEntry.COLUMN_PET_GENDER)) {
             Integer gender = contentValues.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
-            if (gender == null || PetContract.PetEntry.isValidGender(gender)) {
+            if (gender == null || !PetContract.PetEntry.isValidGender(gender)) {
                 throw new IllegalArgumentException("Pet require valid gender");
             }
         }
@@ -218,12 +221,24 @@ public class PetProvider extends ContentProvider {
         }
 
         SQLiteDatabase database = mPetDbHelper.getWritableDatabase();
-        return database.update(PetContract.PetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+        int rowsUpdated = database.update(PetContract.PetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsUpdated;
     }
 
-    private int deletePet(String selection, String[] selectionArgs) {
+    private int deletePet(Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase database = mPetDbHelper.getWritableDatabase();
 
-        return database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+        int rowsDelete =  database.delete(PetContract.PetEntry.TABLE_NAME, selection, selectionArgs);
+
+        if (rowsDelete != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsDelete;
     }
 }

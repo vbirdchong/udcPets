@@ -15,8 +15,11 @@
  */
 package com.example.android.pets;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,9 +35,13 @@ import com.example.android.pets.data.PetContract;
 /**
  * Displays list of pets that were entered and stored in the app.
  */
-public class CatalogActivity extends AppCompatActivity {
+public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+
+    private final static int PET_LOADER = 0;
 
     private final static String LOG_TAG = CatalogActivity.class.getSimpleName();
+
+    private PetCursorAdapter mPetCursorAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,38 +57,16 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        displayDatabaseInfo();
-    }
-
-    /**
-     * Temporary helper method to display information in the onscreen TextView about the state of
-     * the pets database.
-     */
-    private void displayDatabaseInfo() {
-
-        String[] projection = {
-                PetContract.PetEntry._ID,
-                PetContract.PetEntry.COLUMN_PET_NAME,
-                PetContract.PetEntry.COLUMN_PET_BREED,
-                PetContract.PetEntry.COLUMN_PET_GENDER,
-                PetContract.PetEntry.COLUMN_PET_WEIGHT
-        };
-
-        Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI,
-                                                    projection, null/*selection*/, null/*selectionArgs*/, null);
 
         ListView petListView = (ListView) findViewById(R.id.list);
-        PetCursorAdapter petCursorAdapter = new PetCursorAdapter(this, cursor);
-        petListView.setAdapter(petCursorAdapter);
+        mPetCursorAdapter = new PetCursorAdapter(this, null);
+        petListView.setAdapter(mPetCursorAdapter);
 
         // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
         View emptyView = findViewById(R.id.empty_view);
         petListView.setEmptyView(emptyView);
+
+        getLoaderManager().initLoader(PET_LOADER, null, this);
     }
 
     @Override
@@ -99,7 +84,6 @@ public class CatalogActivity extends AppCompatActivity {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
                 insertData();
-                displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -119,5 +103,31 @@ public class CatalogActivity extends AppCompatActivity {
 
         Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, contentValues);
 
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        String[] projection = {
+                PetContract.PetEntry._ID,
+                PetContract.PetEntry.COLUMN_PET_NAME,
+                PetContract.PetEntry.COLUMN_PET_BREED
+        };
+
+        return new CursorLoader(this,
+                                PetContract.PetEntry.CONTENT_URI,
+                                projection,
+                                null,
+                                null,
+                                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mPetCursorAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mPetCursorAdapter.swapCursor(null);
     }
 }
