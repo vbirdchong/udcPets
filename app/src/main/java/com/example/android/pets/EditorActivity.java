@@ -21,7 +21,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -175,7 +174,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String stringBreed = mBreedEditText.getText().toString().trim();
         String stringWeight = mWeightEditText.getText().toString().toString();
 
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        if (TextUtils.isEmpty(stringName)
+                && TextUtils.isEmpty(stringBreed)
+                && TextUtils.isEmpty(stringWeight)){
+            return;
+        }
+
+        if (TextUtils.isEmpty(stringWeight)) {
+            // the pet without a weight input, set to default value 0
+            stringWeight = "0";
+        }
+
         ContentValues values = new ContentValues();
 
         values.put(PetContract.PetEntry.COLUMN_PET_NAME, stringName);
@@ -183,7 +192,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, Integer.parseInt(stringWeight));
         values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender);
 
-        // TODO: 2017/11/10  implement the below code
         if (mCurrentPetUri == null) {
             // add a new pet
             Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, values);
@@ -196,7 +204,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         } else {
             // update the pet
             int rowsUpdate = getContentResolver().update(mCurrentPetUri, values, null, null);
-            Toast.makeText(this, "updeta data: " + rowsUpdate, Toast.LENGTH_SHORT).show();
+            if (rowsUpdate == 0) {
+                Toast.makeText(this, getString(R.string.editor_update_pet_failed), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.editor_update_pet_successful), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
