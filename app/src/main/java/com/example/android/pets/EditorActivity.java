@@ -154,7 +154,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                insertData();
+                savePet();
                 finish();
                 return true;
             // Respond to a click on the "Delete" menu option
@@ -170,7 +170,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         return super.onOptionsItemSelected(item);
     }
 
-    private void insertData() {
+    private void savePet() {
         String stringName = mNameEditText.getText().toString().trim();
         String stringBreed = mBreedEditText.getText().toString().trim();
         String stringWeight = mWeightEditText.getText().toString().toString();
@@ -183,14 +183,21 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, Integer.parseInt(stringWeight));
         values.put(PetContract.PetEntry.COLUMN_PET_GENDER, mGender);
 
-        Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, values);
+        // TODO: 2017/11/10  implement the below code
+        if (mCurrentPetUri == null) {
+            // add a new pet
+            Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, values);
 
-        if (newUri == null) {
-            Toast.makeText(this, getString(R.string.editor_insert_pet_failed), Toast.LENGTH_SHORT).show();
+            if (newUri == null) {
+                Toast.makeText(this, getString(R.string.editor_insert_pet_failed), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
+            }
         } else {
-            Toast.makeText(this, getString(R.string.editor_insert_pet_successful), Toast.LENGTH_SHORT).show();
+            // update the pet
+            int rowsUpdate = getContentResolver().update(mCurrentPetUri, values, null, null);
+            Toast.makeText(this, "updeta data: " + rowsUpdate, Toast.LENGTH_SHORT).show();
         }
-
     }
 
     @Override
