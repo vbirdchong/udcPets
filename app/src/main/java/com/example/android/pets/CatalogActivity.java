@@ -19,18 +19,21 @@ import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
 
@@ -100,22 +103,64 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                showDeleteConfirmationDialog();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Insert dummy data
+     */
     private void insertData() {
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(PetContract.PetEntry.COLUMN_PET_NAME, "Tot");
         contentValues.put(PetContract.PetEntry.COLUMN_PET_BREED, "Terrier");
         contentValues.put(PetContract.PetEntry.COLUMN_PET_GENDER, PetContract.PetEntry.GENDER_MALE);
         contentValues.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, 17);
 
-        Uri newUri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, contentValues);
+        getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, contentValues);
+    }
 
+    /**
+     * Delete all pets info in the database
+     */
+    private void deleteData() {
+        int rowsDelete = getContentResolver().delete(PetContract.PetEntry.CONTENT_URI, null, null);
+        if (rowsDelete > 0) {
+            Toast.makeText(this, getString(R.string.catalog_delete_pets_successfully), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, getString(R.string.catalog_delete_pets_no_data_need_to_delete), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Show delete information when delete all pets
+     */
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the postivie and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_all_pets_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete All Pets" button
+                deleteData();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the pet.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     @Override

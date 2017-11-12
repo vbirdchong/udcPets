@@ -98,9 +98,21 @@
     <!-- Dialog message to ask the user to confirm deleting the current pet [CHAR LIMIT=NONE] -->
     <string name="delete_dialog_msg">Delete this pet?</string>
 
+    <!-- Dialog message to ask the user to confirm deleting the current pet [CHAR LIMIT=NONE] -->
+    <string name="delete_all_pets_dialog_msg">Delete all pets?</string>
+
     <!-- Dialog button text for the option to confirm deleting the current pet [CHAR LIMIT=20] -->
     <string name="delete">Delete</string>
 
     <!-- Dialog button text for the option to cancel deletion of the current pet [CHAR LIMIT=20] -->
     <string name="cancel">Cancel</string>
+
+    <!-- Toast message when delete all pets was successfully [CHAR LIMIT=NONE] -->
+    <string name="catalog_delete_pets_successfully">Pets all deleted</string>
+
+    <!-- Toast message when delete all pets but no pets in database [CHAR LIMIT=NONE] -->
+    <string name="catalog_delete_pets_no_data_need_to_delete">No pets need to delete</string>
+
+    <!-- Text for user didn't input the breed info -->
+    <string name="catalog_unknown_breed">Unknown breed</string>
 </resources>

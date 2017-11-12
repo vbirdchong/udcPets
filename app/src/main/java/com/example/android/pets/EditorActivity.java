@@ -180,7 +180,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      * Perform the deletion of the pet in the database.
      */
     private void deletePet() {
-        // TODO: Implement this method
         if (mCurrentPetUri != null) {
             // delete one pet data
             int rowsOfDelete = getContentResolver().delete(mCurrentPetUri, null, null);
